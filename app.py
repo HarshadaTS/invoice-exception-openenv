@@ -15,6 +15,8 @@ from uuid import uuid4
 
 ENV_NAME = "invoice-exception-openenv"
 DEFAULT_PORT = int(os.environ.get("PORT", "7860"))
+MIN_STRICT_SCORE = 0.01
+MAX_STRICT_SCORE = 0.99
 
 AVAILABLE_ACTIONS = [
     "review_invoice",
@@ -386,6 +388,10 @@ def clamp_unit(value: float) -> float:
     return max(0.0, min(1.0, round(value, 4)))
 
 
+def clamp_strict_score(value: float) -> float:
+    return max(MIN_STRICT_SCORE, min(MAX_STRICT_SCORE, round(value, 4)))
+
+
 def round_amount(value: float) -> float:
     return round(value, 4)
 
@@ -448,7 +454,7 @@ def episode_state(episode: Episode) -> Dict[str, Any]:
         "done": episode.done,
         "step_count": episode.step_count,
         "max_steps": episode.task.max_steps,
-        "score": clamp_unit(score_episode(episode)),
+        "score": clamp_strict_score(score_episode(episode)),
         "total_reward": round_amount(episode.total_reward),
         "reward_history": episode.reward_history,
         "action_history": episode.action_history,
@@ -464,7 +470,7 @@ def score_episode(episode: Episode) -> float:
     penalty = min(0.35, (episode.unsafe_resolution_attempts * 0.08) + (episode.irrelevant_actions * 0.03))
     if episode.done and episode.final_decision is None:
         penalty += 0.04
-    return clamp_unit(positive - penalty)
+    return clamp_strict_score(positive - penalty)
 
 
 def reset_episode(task_id: str, session_id: str) -> Episode:
@@ -499,7 +505,7 @@ def step_episode(episode: Episode, action_type: str, rationale: str = "") -> Dic
             "observation": current_observation(episode),
             "reward": 0.0,
             "done": True,
-            "score": clamp_unit(score_episode(episode)),
+            "score": clamp_strict_score(score_episode(episode)),
             "info": {"error": episode.last_action_error},
         }
 
@@ -674,7 +680,7 @@ def step_episode(episode: Episode, action_type: str, rationale: str = "") -> Dic
         "observation": current_observation(episode),
         "reward": reward,
         "done": episode.done,
-        "score": clamp_unit(score_episode(episode)),
+        "score": clamp_strict_score(score_episode(episode)),
         "info": info,
     }
 
@@ -746,7 +752,7 @@ class OpenEnvHandler(BaseHTTPRequestHandler):
                     "task": build_public_task(episode.task),
                     "observation": current_observation(episode),
                     "done": episode.done,
-                    "score": 0.0,
+                    "score": clamp_strict_score(score_episode(episode)),
                 }
             )
             return
