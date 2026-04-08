@@ -1,0 +1,127 @@
+name: invoice-exception-openenv
+version: 1.0.0
+description: >
+  An OpenEnv-style environment for supplier invoice exception handling.
+  Agents review invoice evidence, compare it to the purchase order and goods receipt,
+  detect duplicates, evaluate approved exceptions, and choose the correct financial control action.
+author: OpenEnv Hackathon Submission
+license: MIT
+tags:
+  - openenv
+  - finance
+  - operations
+  - invoice-processing
+  - real-world
+
+api:
+  base_url: /
+  endpoints:
+    reset:
+      method: POST
+      path: /reset
+      request_model: ResetRequest
+      response_model: ResetResult
+    step:
+      method: POST
+      path: /step
+      request_model: Action
+      response_model: StepResult
+    state:
+      method: GET
+      path: /state
+      response_model: State
+    tasks:
+      method: GET
+      path: /tasks
+      response_model: TaskListResponse
+
+models:
+  action:
+    type: Action
+    fields:
+      - name: action_type
+        type: str
+        required: true
+        enum:
+          - review_invoice
+          - compare_po
+          - check_receipt
+          - search_duplicate
+          - request_supporting_doc
+          - approve
+          - route_to_review
+          - flag_duplicate
+          - reject
+          - done
+      - name: session_id
+        type: Optional[str]
+      - name: rationale
+        type: Optional[str]
+  observation:
+    type: Observation
+    fields:
+      - name: session_id
+        type: str
+      - name: task_id
+        type: str
+      - name: task_name
+        type: str
+      - name: task_description
+        type: str
+      - name: step_count
+        type: int
+      - name: max_steps
+        type: int
+      - name: available_actions
+        type: List[str]
+      - name: risk_focus
+        type: str
+      - name: supplier_profile
+        type: SupplierProfile
+      - name: documents
+        type: Dict[str, Any]
+      - name: milestones
+        type: Dict[str, bool]
+      - name: final_decision
+        type: Optional[str]
+      - name: last_action_result
+        type: Optional[str]
+      - name: last_action_error
+        type: Optional[str]
+  state:
+    type: State
+    fields:
+      - name: environment
+        type: str
+      - name: session_id
+        type: str
+      - name: done
+        type: bool
+      - name: step_count
+        type: int
+      - name: max_steps
+        type: int
+      - name: score
+        type: float
+      - name: total_reward
+        type: float
+      - name: reward_history
+        type: List[float]
+      - name: action_history
+        type: List[Dict[str, Any]]
+      - name: observation
+        type: Observation
+
+tasks:
+  - task_id: invoice_easy
+    name: Standard Match Approval
+    difficulty: easy
+  - task_id: invoice_medium
+    name: Price Mismatch Escalation
+    difficulty: medium
+  - task_id: invoice_hard
+    name: Duplicate Invoice Prevention
+    difficulty: hard
+  - task_id: invoice_expert
+    name: Approved Change Order Clearance
+    difficulty: expert

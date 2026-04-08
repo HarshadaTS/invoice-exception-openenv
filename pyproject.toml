@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "invoice-exception-openenv"
+version = "1.0.0"
+description = "OpenEnv submission for supplier invoice exception handling."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "OpenEnv Hackathon Submission" }
+]
+dependencies = [
+  "openai>=1.30.0",
+  "openenv-core>=0.2.3",
+]
+
+[project.scripts]
+server = "app:main"
+
+[tool.setuptools]
+py-modules = ["app", "inference", "smoke_test"]
