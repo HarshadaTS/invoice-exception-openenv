@@ -200,7 +200,7 @@ def build_tasks() -> Dict[str, TaskDefinition]:
                 "checked_po": 0.2,
                 "checked_receipt": 0.23,
                 "resolved_correctly": 0.35,
-                "closed_case": 0.1,
+                "closed_case": 0.09,
             },
         ),
         "invoice_medium": TaskDefinition(
@@ -258,7 +258,7 @@ def build_tasks() -> Dict[str, TaskDefinition]:
                 "checked_receipt": 0.15,
                 "requested_doc": 0.2,
                 "resolved_correctly": 0.27,
-                "closed_case": 0.1,
+                "closed_case": 0.09,
             },
         ),
         "invoice_hard": TaskDefinition(
@@ -317,7 +317,7 @@ def build_tasks() -> Dict[str, TaskDefinition]:
                 "checked_duplicates": 0.22,
                 "flagged_risk": 0.08,
                 "resolved_correctly": 0.24,
-                "closed_case": 0.1,
+                "closed_case": 0.09,
             },
         ),
         "invoice_expert": TaskDefinition(
@@ -378,7 +378,7 @@ def build_tasks() -> Dict[str, TaskDefinition]:
                 "requested_doc": 0.22,
                 "checked_receipt": 0.14,
                 "resolved_correctly": 0.28,
-                "closed_case": 0.1,
+                "closed_case": 0.09,
             },
         ),
     }
