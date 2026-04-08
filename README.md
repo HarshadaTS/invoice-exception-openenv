@@ -1,6 +1,6 @@
 ---
 title: Invoice Exception Openenv
-emoji: crab
+emoji: 🦀
 colorFrom: blue
 colorTo: yellow
 sdk: docker
