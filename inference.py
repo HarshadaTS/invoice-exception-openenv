@@ -25,6 +25,8 @@ API_BASE_URL = os.environ.get("API_BASE_URL", "")
 MODEL_NAME = os.environ.get("MODEL_NAME", "deterministic-baseline")
 API_KEY = os.environ.get("HF_TOKEN") or os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY") or ""
 ENV_URL = os.environ.get("ENV_URL", "http://127.0.0.1:7860")
+MIN_STRICT_SCORE = 0.01
+MAX_STRICT_SCORE = 0.99
 
 TASK_PLANS: Dict[str, List[str]] = {
     "invoice_easy": ["review_invoice", "compare_po", "check_receipt", "approve", "done"],
@@ -78,8 +80,9 @@ def log_step(step: int, action_type: str, reward: float, done: bool, error: Opti
 
 def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{reward:.2f}" for reward in rewards)
+    safe_score = max(MIN_STRICT_SCORE, min(MAX_STRICT_SCORE, score))
     print(
-        f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}",
+        f"[END] success={str(success).lower()} steps={steps} score={safe_score:.4f} rewards={rewards_str}",
         flush=True,
     )
 
@@ -133,7 +136,7 @@ def run_task(task: Dict[str, Any]) -> Dict[str, Any]:
     rewards: List[float] = []
     success = False
     steps_taken = 0
-    score = 0.0
+    score = MIN_STRICT_SCORE
 
     log_start(task_name)
     try:
@@ -155,7 +158,7 @@ def run_task(task: Dict[str, Any]) -> Dict[str, Any]:
             steps_taken += 1
             log_step(steps_taken, action_type, reward, done, observation.get("last_action_error"))
             if done:
-                score = float(result["score"])
+                score = max(MIN_STRICT_SCORE, min(MAX_STRICT_SCORE, float(result["score"])))
                 success = score >= 0.8
                 break
     except urllib.error.URLError as exc:
