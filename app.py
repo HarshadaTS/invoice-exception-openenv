@@ -511,9 +511,9 @@ def step_episode(episode: Episode, action_type: str, rationale: str = "") -> Dic
 
     episode.step_count += 1
     episode.last_action_error = None
-    reward = 0.03
-    info: Dict[str, Any] = {"rationale": rationale}
     task = episode.task
+    reward = 0.03 if action_type in task.relevant_actions or action_type in ("approve","route_to_review","reject","done") else 0.0
+    info: Dict[str, Any] = {"rationale": rationale}
 
     def mark_evidence(
         milestone: str,
@@ -524,13 +524,13 @@ def step_episode(episode: Episode, action_type: str, rationale: str = "") -> Dic
         reveal_key: Optional[str] = None,
     ) -> None:
         nonlocal reward
-        if reveal_key:
-            episode.revealed_docs[reveal_key] = True
         if action_type not in task.relevant_actions:
             episode.irrelevant_actions += 1
             reward = max(0.0, reward - 0.02)
             episode.last_action_result = irrelevant_message
             return
+        if reveal_key:
+            episode.revealed_docs[reveal_key] = True
         if episode.milestones[milestone]:
             episode.irrelevant_actions += 1
             reward = max(0.0, reward - 0.01)
